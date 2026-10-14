@@ -177,5 +177,5 @@ export default function App() {
   const [session, setSession] = useState(() => JSON.parse(localStorage.getItem("kumbhSession") || "null"));
   function login(data) { const next = { token: data.token, user: data.user }; localStorage.setItem("kumbhSession", JSON.stringify(next)); setSession(next); }
   function logout() { localStorage.removeItem("kumbhSession"); setSession(null); }
-  return <main><header><h1>Kumbh Niwara</h1>{session && <div><span>{session.user.name} ({session.user.role})</span><button className="secondary" onClick={logout}>Logout</button></div>}</header>{!session ? <AuthForm onLogin={login} /> : session.user.role === "host" ? <HostView token={session.token} /> : session.user.role === "admin" ? <AdminView token={session.token} /> : <PilgrimView token={session.token} />}</main>;
+  return <main><header><h1>Kumbh-Niwara</h1>{session && <div><span>{session.user.name} ({session.user.role})</span><button className="secondary" onClick={logout}>Logout</button></div>}</header>{!session ? <AuthForm onLogin={login} /> : session.user.role === "host" ? <HostView token={session.token} /> : session.user.role === "admin" ? <AdminView token={session.token} /> : <PilgrimView token={session.token} />}</main>;
 }
