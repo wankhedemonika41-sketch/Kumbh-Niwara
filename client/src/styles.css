@@ -1,0 +1,17 @@
+:root { font-family: Arial, sans-serif; color: #1f2937; background: #fff8ef; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 1100px; margin: auto; padding: 20px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 28px; }
+h1 { color: #9a3412; } h2 { margin-top: 28px; }
+.card { background: white; border: 1px solid #fed7aa; border-radius: 12px; padding: 18px; box-shadow: 0 3px 10px #0000000d; }
+.auth-card { max-width: 420px; margin: 60px auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+form { display: grid; gap: 12px; }
+input, textarea, select { width: 100%; padding: 11px; border: 1px solid #d1d5db; border-radius: 7px; font: inherit; }
+textarea { min-height: 100px; }
+button { border: 0; border-radius: 7px; padding: 10px 14px; margin: 8px 8px 0 0; color: white; background: #c2410c; cursor: pointer; }
+button:hover { background: #9a3412; } .secondary { background: #6b7280; } .danger { background: #b91c1c; }
+.link-button { background: none; color: #9a3412; padding-left: 0; } .message { color: #9a3412; min-height: 20px; }
+.booking-box { margin-top: 20px; display: grid; gap: 10px; max-width: 500px; }
+@media (max-width: 600px) { header { align-items: flex-start; flex-direction: column; } main { padding: 12px; } }
