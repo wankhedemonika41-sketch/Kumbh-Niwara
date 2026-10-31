@@ -34,8 +34,8 @@ function authOptions(token, method = "GET", body) {
   };
 }
 
-function AuthForm({ onLogin }) {
-  const [mode, setMode] = useState("login");
+function AuthForm({ onLogin, initialMode = "login", onBack }) {
+  const [mode, setMode] = useState(initialMode);
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "pilgrim" });
   const [message, setMessage] = useState("");
 
@@ -68,7 +68,63 @@ function AuthForm({ onLogin }) {
       <button className="link-button" onClick={() => { setMode(mode === "login" ? "register" : "login"); setMessage(""); }}>
         {mode === "login" ? "Need an account? Register" : "Already registered? Login"}
       </button>
+      {onBack && <button className="link-button" onClick={onBack}>← Back to home</button>}
     </section>
+  );
+}
+
+function Landing({ onLogin, onRegister }) {
+  const [featured, setFeatured] = useState([]);
+  useEffect(() => {
+    request("/properties").then((d) => setFeatured((d.properties || []).slice(0, 3))).catch(() => {});
+  }, []);
+
+  return (
+    <>
+      <section className="hero">
+        <p className="eyebrow">Nashik · Simhastha Kumbh Mela</p>
+        <h2>Find a trusted homestay for your Kumbh pilgrimage</h2>
+        <p className="hero-sub">Book verified local homes near the ghats. Hosts earn, pilgrims stay comfortably, and every property is approved by our team.</p>
+        <div className="hero-actions">
+          <button onClick={onRegister}>Get started</button>
+          <button className="secondary" onClick={onLogin}>Login</button>
+        </div>
+      </section>
+
+      <section className="steps">
+        <h2>How it works</h2>
+        <div className="grid">
+          <article className="card"><span className="step-no">1</span><h3>Search</h3><p>Browse approved homestays and check availability for your dates.</p></article>
+          <article className="card"><span className="step-no">2</span><h3>Book &amp; pay</h3><p>Reserve your stay and pay securely online with Razorpay.</p></article>
+          <article className="card"><span className="step-no">3</span><h3>Stay</h3><p>Arrive to a verified home hosted by a local family.</p></article>
+        </div>
+      </section>
+
+      {featured.length > 0 && (
+        <section>
+          <h2>Featured homestays</h2>
+          <div className="grid">
+            {featured.map((p) => (
+              <article className="card" key={p._id}>
+                {p.images?.[0] && <img className="thumb" src={p.images[0]} alt={p.title} />}
+                <h3>{p.title}</h3>
+                <p>{p.location}</p>
+                <strong>₹{p.pricePerNight} / night</strong>
+                <button onClick={onLogin}>Login to book</button>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="card host-cta">
+        <h2>Own a home near the Kumbh?</h2>
+        <p>List your property as a host and welcome pilgrims during the festival.</p>
+        <button onClick={onRegister}>Become a host</button>
+      </section>
+
+      <footer className="site-footer">© {new Date().getFullYear()} Kumbh Niwara</footer>
+    </>
   );
 }
 
@@ -175,7 +231,26 @@ function AdminView({ token }) {
 
 export default function App() {
   const [session, setSession] = useState(() => JSON.parse(localStorage.getItem("kumbhSession") || "null"));
+  const [view, setView] = useState("landing"); // landing | login | register
   function login(data) { const next = { token: data.token, user: data.user }; localStorage.setItem("kumbhSession", JSON.stringify(next)); setSession(next); }
-  function logout() { localStorage.removeItem("kumbhSession"); setSession(null); }
-  return <main><header><h1>Kumbh-Niwara</h1>{session && <div><span>{session.user.name} ({session.user.role})</span><button className="secondary" onClick={logout}>Logout</button></div>}</header>{!session ? <AuthForm onLogin={login} /> : session.user.role === "host" ? <HostView token={session.token} /> : session.user.role === "admin" ? <AdminView token={session.token} /> : <PilgrimView token={session.token} />}</main>;
+  function logout() { localStorage.removeItem("kumbhSession"); setSession(null); setView("landing"); }
+  return (
+    <main>
+      <header>
+        <h1 className="brand" onClick={() => !session && setView("landing")}>Kumbh Niwara</h1>
+        {session ? (
+          <div><span>{session.user.name} ({session.user.role})</span><button className="secondary" onClick={logout}>Logout</button></div>
+        ) : view === "landing" ? (
+          <div><button className="secondary" onClick={() => setView("login")}>Login</button><button onClick={() => setView("register")}>Register</button></div>
+        ) : null}
+      </header>
+      {!session
+        ? view === "landing"
+          ? <Landing onLogin={() => setView("login")} onRegister={() => setView("register")} />
+          : <AuthForm key={view} initialMode={view} onLogin={login} onBack={() => setView("landing")} />
+        : session.user.role === "host" ? <HostView token={session.token} />
+        : session.user.role === "admin" ? <AdminView token={session.token} />
+        : <PilgrimView token={session.token} />}
+    </main>
+  );
 }
